@@ -13,11 +13,18 @@ WINNING_COMBINATIONS = ((0, 1, 2),
 class TicTacToe:
     def __init__(self):
         self.board = [' ' for _ in range(9)]
+        self.turnPlayer = 'X'
         self.current_winner = None
 
-    def print_board(self):
-        for row in [self.board[i*3:(i+1)*3] for i in range(3)]:
-            print('| ' + ' | '.join(row) + ' |')
+    def board_to_string(self):
+        return ('`| ' + self.board[0] + ' | ' + self.board[1] + ' | ' + self.board[2] + ' |\n' +
+                '| ' + self.board[3] + ' | ' + self.board[4] + ' | ' + self.board[5] + ' |\n' +
+                '| ' + self.board[6] + ' | ' + self.board[7] + ' | ' + self.board[8] + ' |\n`')
+    
+    def board_to_string_with_numbers(self):
+        return ('`| 0 | 1 | 2 |\n' +
+                '| 3 | 4 | 5 |\n' +
+                '| 6 | 7 | 8 |\n`')
 
     def check_win(self):
         # check rows
@@ -28,39 +35,47 @@ class TicTacToe:
         return False
     
     def check_draw(self):
-        return ' ' not in self.board
+        return ' ' not in self.board and not self.check_win()
     
-    def make_move(self, square, letter):
+    def make_move(self, square):
         if self.board[square] == ' ':
-            self.board[square] = letter
+            self.board[square] = self.turnPlayer
             return True
         return False
     
+    def switch_turn_player(self):
+        if self.turnPlayer == 'X':
+            self.turnPlayer = 'O'
+        else:
+            self.turnPlayer = 'X'
+
     def game_loop(self):
-        turnPlayer = 'X'
         while True:
-            self.print_board()
-            choice = input("It's " + turnPlayer + "'s turn. Input move (0-8): ")
+            print(self.board_to_string())
+            choice = input("It's " + self.turnPlayer + "'s turn. Input move (0-8): ")
             try:
                 choice = int(choice)
-                if self.make_move(choice, turnPlayer):
+                if self.make_move(choice, self.turnPlayer):
                     if self.check_win():
-                        self.print_board()
-                        print(turnPlayer + " wins!")
+                        print(self.board_to_string())
+                        print(self.turnPlayer + " wins!")
                         break
                     elif self.check_draw():
-                        self.print_board()
+                        print(self.board_to_string())
                         print("It's a draw!")
                         break
                     else:
-                        if turnPlayer == 'X':
-                            turnPlayer = 'O'
+                        if self.turnPlayer == 'X':
+                            self.turnPlayer = 'O'
                         else:
-                            turnPlayer = 'X'
+                            self.turnPlayer = 'X'
                 else: 
                     print("That square is taken.")
             except ValueError:
                 print("Please type a number.")
+
+    def victoryMessage(self):
+        return self.current_winner + " wins!"
 
 if __name__ == '__main__':
     game = TicTacToe()
