@@ -7,12 +7,6 @@ intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# store a list of tic tac toe games in progress
-# the games are formatted as a dictionary with the key being the player who started the game
-# and the value being the TicTacToe object
-playersLookingForGame = {}
-ongoingGames = {}
-
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
@@ -23,14 +17,12 @@ async def ping(ctx):
 
 @bot.command(name='joinqueue', help='Join the game queue')
 async def joinqueue(ctx, user=None):
-    for player in playersLookingForGame:
-        if playersLookingForGame[player] == str(ctx.author):
-            await ctx.send("You're already waiting for a game!")
-            return
-    for game in ongoingGames:
-        if user_is_in_game(game, ctx.author):
-            await ctx.send("You're already in a game!")
-            return
+    if player_is_in_game_queue(ctx.author):
+        await ctx.send("You're already waiting for a game!")
+        return
+    if player_is_in_ongoing_game(ctx.author):
+        await ctx.send("You're already in a game!")
+        return
     # convert author to string so that it can be used as a key in the dictionary
     playersLookingForGame[str(ctx.author)] = user
     await ctx.send(f"{str(ctx.author)} has joined the game queue!")
@@ -45,10 +37,9 @@ async def leavequeue(ctx):
 
 @bot.command(name='accept', help='Accept a tic tac toe game')
 async def accept(ctx, user):
-    for game in ongoingGames:
-        if user_is_in_game(game, ctx.author):
-            await ctx.send("You're already in a game!")
-            return
+    if player_is_in_ongoing_game(ctx.author):
+        await ctx.send("You're already in a game!")
+        return
     if str(ctx.author) in playersLookingForGame:
         await ctx.send("You're waiting for a game! Leave the queue before accepting a match!")
         return
@@ -86,10 +77,12 @@ async def move(ctx, square):
         return
     game = ongoingGames[key]
     # the first player is always X and the second player is always O
-    if game.turnPlayer == 'X' and str(ctx.author) != key.split(SPACER_CHARACTER)[0]:
+    xPlayer = key.split(SPACER_CHARACTER)[0]
+    oPlayer = key.split(SPACER_CHARACTER)[1]
+    if game.turnPlayer == 'X' and str(ctx.author) != xPlayer:
         await ctx.send("It's not your turn!")
         return
-    if game.turnPlayer == 'O' and str(ctx.author) != key.split(SPACER_CHARACTER)[1]:
+    if game.turnPlayer == 'O' and str(ctx.author) != oPlayer:
         await ctx.send("It's not your turn!")
         return
     if not game.make_move(int(square)):
