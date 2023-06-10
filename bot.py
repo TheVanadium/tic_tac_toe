@@ -2,6 +2,7 @@ import discord
 from queue_navigation_methods import *
 from discord.ext import commands
 from tic_tac_toe import TicTacToe
+from player_elo_manager import *
 
 intents = discord.Intents.all()
 
@@ -92,14 +93,18 @@ async def move(ctx, square):
     await ctx.send(f"{str(ctx.author)} played on {square}")
     await ctx.send(game.board_to_string())
 
+    opponent = xPlayer if str(ctx.author) == oPlayer else oPlayer
+
     if game.check_win():
         await ctx.send(f"{game.turnPlayer} wins!")
         del ongoingGames[key]
+        update_player_stats(str(ctx.author), opponent)
         return
     
     if game.check_draw():
         await ctx.send("It's a draw!")
         del ongoingGames[key]
+        update_player_stats(str(ctx.author), opponent, True)
         return
     
     game.switch_turn_player()
@@ -163,11 +168,30 @@ async def quit(ctx):
             key = k
             break
     del ongoingGames[key]
+    # give the other player a win
+    opponent = key.split(SPACER_CHARACTER)[0] if str(ctx.author) == key.split(SPACER_CHARACTER)[1] else key.split(SPACER_CHARACTER)[1]
+    update_player_stats(opponent, str(ctx.author))
     await ctx.send("You've quit the game.")
+    await ctx.send(f"{opponent} wins!")
 
-# tell mads i love her
-@bot.command(name='iloveyou', help='Tell Mads you love her')
-async def iloveyou(ctx):
-    # if author is Vanadium#5509, send message
-    if str(ctx.author) == "Vanadium#5509": await ctx.send("i wove you mads!")
-    if str(ctx.author) == "PrincessLeia#1424": await ctx.send("i wove you carr!")
+# show elo
+@bot.command(name='elo', help='Show your elo')
+async def elo(ctx, player_name=None):
+    if player_name == None:
+        player_name = str(ctx.author)
+    if get_player_stat(player_name, 'rating') == None: 
+        await ctx.send(f"{player_name} doesn't have an elo yet!")
+        return
+    message = f"{player_name}'s elo is {get_player_stat(player_name, 'rating')}"
+    # if rd is > 100, add a ? to the end to signify that the rating is not accurate
+    if get_player_stat(player_name, 'rd') > 100: message += "?"
+    await ctx.send(f"{player_name}'s elo is {get_player_stat(player_name, 'rating')}")
+
+# show leaderboard
+@bot.command(name='leaderboard', help='Show the leaderboard')
+async def leaderboard(ctx):
+    get_leaderboard()
+    message = "Leaderboard:\n"
+    for i, player in enumerate(leaderboard):
+        message +=  i + f"{player[0]}: {player[1]}\n"
+    await ctx.send(message)
