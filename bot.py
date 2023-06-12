@@ -30,6 +30,10 @@ async def on_ready():
 async def ping(ctx):
     await ctx.send('pong')
 
+@bot.command(name='github', help='Sends a link to the github repo')
+async def github(ctx):
+    await ctx.send('https://github.com/TheVanadium/tic_tac_toe')
+
 COMMAND_CATEGORIES = {
     'Elo': ['elo', 'leaderboard'],
     'Game': ['accept', 'board', 'joinqueue', 'leavequeue', 'move', 'numberedboard', 'quit', 'showgames', 'showqueue'],
