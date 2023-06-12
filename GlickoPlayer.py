@@ -33,8 +33,7 @@ class GlickoPlayer:
         time_diff = (datetime.datetime.now() - self.last_game_date).days / 30  # Assuming 30 days per month
         phi = math.sqrt(self.rd ** 2 + self.vol ** 2)
         self.rd = math.sqrt(self.rd ** 2 + self.vol ** 2 * time_diff / c ** 2)
-        self.rating += (self.rd ** 2) * (phi ** 2)
-        self.rd = math.sqrt(self.rd ** 2 + self.vol ** 2 * time_diff / c ** 2)
+        self.vol = math.sqrt(self.vol ** 2 * (1 - time_diff / c ** 2))
     
     def _update_volatility(self, d_squared):
         a = math.log(self.vol ** 2)
