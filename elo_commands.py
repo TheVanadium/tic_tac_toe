@@ -5,9 +5,12 @@ from player_elo_manager import *
 @commands.command (name='leaderboard', help='Displays the leaderboard', category='Elo')
 async def leaderboard(ctx):
     leaderboard = get_leaderboard()
+    if len(leaderboard) == 0:
+        await ctx.send("There are no eligible players yet!")
+        return
     message = "Leaderboard:\n"
     for i, player in enumerate(leaderboard):
-        message +=  i + f"{player[0]}: {player[1]}\n"
+        message +=  f"{i+1} - {player[0]}: {player[1]}\n"
     await ctx.send(message)
 
 @commands.command(name='elo', help='Show your elo', category='Elo')

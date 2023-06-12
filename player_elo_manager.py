@@ -62,6 +62,7 @@ def get_leaderboard(player: str=None, num_players=10):
         if data[player_name]['rd'] >= 100: continue
         leaderboard.append((player_name, data[player_name]['rating']))
     leaderboard.sort(key=lambda x: x[1], reverse=True)
+    if player == None: return leaderboard[:num_players]
     if player not in [x[0] for x in leaderboard]:
         player_rating = get_player_stat(player, 'rating')
         if player_rating is None: player_rating = 1500

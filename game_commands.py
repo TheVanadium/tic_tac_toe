@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from tic_tac_toe import TicTacToe
 from queue_navigation_methods import *
+from player_elo_manager import *
 
 @commands.command(name='joinqueue', help='Join the game queue', category='Game')
 async def joinqueue(ctx, user=None):
@@ -140,12 +141,12 @@ async def board(ctx):
 @commands.command(name='numberedboard', help='Show the number of each cell on the board', category='Game')
 async def numberedboard(ctx):
     tempGame = TicTacToe()
-    await ctx.send(tempGame.board_to_string())
+    await ctx.send(tempGame.board_to_string_with_numbers())
 
 # quit
 @commands.command(name='quit', help='Quit the game you are in', category='Game')
 async def quit(ctx):
-    if str(ctx.author) not in ongoingGames:
+    if not user_is_in_game(str(ctx.author)):
         await ctx.send("You're not in a game!")
         return
     # find the game the caller is in
